@@ -18,7 +18,7 @@ The real-time capable features used in the sample are in Beta.
 To use this sample, clone the repository locally if you haven't already done so:
 
 ```
-git clone https://github.com/Azure/azure-sphere-samples.git
+git clone https://github.com/CloudConnectKits/Azure_Sphere_SK_ADC_RTApp.git
 ```
 
 ## Prerequisites
