@@ -1,6 +1,7 @@
 
 
 #include "oled.h"
+#include <math.h>
 
 
 uint8_t oled_state = 0;
@@ -452,11 +453,15 @@ void update_environ(float temp1, float temp2, float atm)
 {
 	uint32_t i;
 	uint8_t string_data[10];
+	float altitude;
 
 	// Strings for labels
 	uint8_t str_temp1[] = "Temp1:";
 	uint8_t str_temp2[] = "Temp2:";
-	uint8_t str_atm[] = "Atm:";
+	uint8_t str_atm[] = "Atm:"; 
+	uint8_t str_altitude[] = "Alt:";
+
+	altitude = 44307.69396 * (1 - powf((atm / 1013.25), 0.190284));
 
 	// Clear OLED buffer
 	clear_oled_buffer();
@@ -493,6 +498,16 @@ void update_environ(float temp1, float temp2, float atm)
 	sd1306_draw_string(sizeof(str_atm) * 6, OLED_LINE_3_Y, string_data, FONT_SIZE_LINE, white_pixel);
 	// Draw the units of atm
 	sd1306_draw_string(sizeof(str_atm) * 6 + (get_str_size(string_data) + 1) * 6, OLED_LINE_3_Y, "hPa", FONT_SIZE_LINE, white_pixel);
+
+	// Convert atm value to string
+	ftoa(altitude, string_data, 2);
+
+	// Draw a label at line 4
+	sd1306_draw_string(OLED_LINE_4_X, OLED_LINE_4_Y, str_altitude, FONT_SIZE_LINE, white_pixel);
+	// Draw the value of altitude
+	sd1306_draw_string(sizeof(str_altitude) * 6, OLED_LINE_4_Y, string_data, FONT_SIZE_LINE, white_pixel);
+	// Draw the units of altitude
+	sd1306_draw_string(sizeof(str_altitude) * 6 + (get_str_size(string_data) + 1) * 6, OLED_LINE_4_Y, "m", FONT_SIZE_LINE, white_pixel);
 
 	// Send the buffer to OLED RAM
 	sd1306_refresh();

@@ -160,7 +160,7 @@ void AccelTimerEventHandler(EventData *eventData)
 		lsm6dso_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
 		lsm6dsoTemperature_degC = lsm6dso_from_lsb_to_celsius(data_raw_temperature.i16bit);
 
-		Log_Debug("LSM6DSO: Temperature  [degC]: %.2f\r\n", lsm6dsoTemperature_degC);
+		Log_Debug("LSM6DSO: Temperature1 [degC]: %.2f\r\n", lsm6dsoTemperature_degC);
 	}
 
 	// Read the sensors on the lsm6dso device
@@ -181,7 +181,7 @@ void AccelTimerEventHandler(EventData *eventData)
 		lps22hhTemperature_degC = lps22hh_from_lsb_to_celsius(data_raw_temperature.i16bit);
 
 		Log_Debug("LPS22HH: Pressure     [hPa] : %.2f\r\n", pressure_hPa);
-		Log_Debug("LPS22HH: Temperature  [degC]: %.2f\r\n", lps22hhTemperature_degC);
+		Log_Debug("LPS22HH: Temperature2 [degC]: %.2f\r\n", lps22hhTemperature_degC);
 	}
 
 
