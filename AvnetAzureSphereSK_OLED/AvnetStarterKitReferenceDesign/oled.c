@@ -461,7 +461,14 @@ void update_environ(float temp1, float temp2, float atm)
 	uint8_t str_atm[] = "Atm:"; 
 	uint8_t str_altitude[] = "Alt:";
 
-	altitude = 44307.69396 * (1 - powf((atm / 1013.25), 0.190284));
+/*
+	The ALTITUDE value calculated is actually "Pressure Altitude". This lacks correction for temperature (and humidity)  
+	"pressure altitude" calculator located at: https://www.weather.gov/epz/wxcalc_pressurealtitude
+	"pressure altitude" formula is defined at: https://www.weather.gov/media/epz/wxcalc/pressureAltitude.pdf 
+	 altitude in feet = 145366.45 * (1 - (hPa / 1013.25) ^ 0.190284) feet
+	 altitude in meters = 145366.45 * 0.3048 * (1 - (hPa / 1013.25) ^ 0.190284) meters
+*/
+	altitude = 44307.69396 * (1 - powf((atm / 1013.25), 0.190284));  // pressure altitude in meters
 
 	// Clear OLED buffer
 	clear_oled_buffer();
