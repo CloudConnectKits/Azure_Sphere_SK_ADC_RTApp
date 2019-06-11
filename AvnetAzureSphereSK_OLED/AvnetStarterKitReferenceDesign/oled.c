@@ -506,7 +506,7 @@ void update_environ(float temp1, float temp2, float atm)
 	// Draw the units of atm
 	sd1306_draw_string(sizeof(str_atm) * 6 + (get_str_size(string_data) + 1) * 6, OLED_LINE_3_Y, "hPa", FONT_SIZE_LINE, white_pixel);
 
-	// Convert atm value to string
+	// Convert altitude value to string
 	ftoa(altitude, string_data, 2);
 
 	// Draw a label at line 4
