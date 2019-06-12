@@ -78,7 +78,7 @@ struct WifiConfig_ConnectedNetwork
 };
 */
 
-extern void oled_init(void);
+extern uint8_t oled_init(void);
 
 extern void oled_i2c_bus_status(uint8_t lsmod_status);
 

@@ -33,7 +33,7 @@ enum pixelcolor
   * @param  None.
   * @retval None.
   */
-extern void sd1306_init(void);
+extern uint8_t sd1306_init(void);
 
 /**
   * @brief  Draw a pixel at specified coordinates

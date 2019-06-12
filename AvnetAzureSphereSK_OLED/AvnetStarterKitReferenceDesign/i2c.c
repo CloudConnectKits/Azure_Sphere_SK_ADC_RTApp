@@ -69,6 +69,8 @@ const uint8_t lsm6dsOAddress = LSM6DSO_ADDRESS;     // Addr = 0x6A
 lsm6dso_ctx_t dev_ctx;
 lps22hh_ctx_t pressure_ctx;
 
+float altitude;
+
 // Status variables
 uint8_t lsm6dso_status = 1;
 uint8_t lps22hh_status = 1;
@@ -194,7 +196,21 @@ void AccelTimerEventHandler(EventData *eventData)
 	sensor_data.lsm6dsoTemperature_degC = lsm6dsoTemperature_degC;
 	sensor_data.lps22hhpressure_hPa = pressure_hPa;
 	sensor_data.lps22hhTemperature_degC = lps22hhTemperature_degC;
-	
+
+	/*
+	The ALTITUDE value calculated is actually "Pressure Altitude". This lacks correction for temperature (and humidity)
+	"pressure altitude" calculator located at: https://www.weather.gov/epz/wxcalc_pressurealtitude
+	"pressure altitude" formula is defined at: https://www.weather.gov/media/epz/wxcalc/pressureAltitude.pdf
+	 altitude in feet = 145366.45 * (1 - (hPa / 1013.25) ^ 0.190284) feet
+	 altitude in meters = 145366.45 * 0.3048 * (1 - (hPa / 1013.25) ^ 0.190284) meters
+	*/
+	// weather.com formula
+	//altitude = 44307.69396 * (1 - powf((atm / 1013.25), 0.190284));  // pressure altitude in meters
+	// Bosch's formula
+	altitude = 44330 * (1 - powf((pressure_hPa / 1013.25), 1 / 5.255));  // pressure altitude in meters
+
+	Log_Debug("ALSPT19: Light intst. [Lux] : %.2f\r\n", light_sensor);
+
 	//// OLED
 	update_oled();
 
@@ -212,8 +228,13 @@ void AccelTimerEventHandler(EventData *eventData)
 		}
 
 		// construct the telemetry message
+		/*
 		snprintf(pjsonBuffer, JSON_BUFFER_SIZE, "{\"gX\":\"%.4lf\", \"gY\":\"%.4lf\", \"gZ\":\"%.4lf\", \"pressure\": \"%.2f\", \"aX\": \"%4.2f\", \"aY\": \"%4.2f\", \"aZ\": \"%4.2f\"}",
 			acceleration_mg[0], acceleration_mg[1], acceleration_mg[2], pressure_hPa, angular_rate_dps[0], angular_rate_dps[1], angular_rate_dps[2]);
+		*/
+
+		snprintf(pjsonBuffer, JSON_BUFFER_SIZE, "{\"gX\":\"%.4lf\", \"gY\":\"%.4lf\", \"gZ\":\"%.4lf\", \"pressure\": \"%.2f\", \"aX\": \"%4.2f\", \"aY\": \"%4.2f\", \"aZ\": \"%4.2f\", \"light_intensity\": \"%.2f\", \"altitude\": \"%.2f\"}",
+			acceleration_mg[0], acceleration_mg[1], acceleration_mg[2], pressure_hPa, angular_rate_dps[0], angular_rate_dps[1], angular_rate_dps[2], light_sensor, altitude);
 
 		Log_Debug("\n[Info] Sending telemetry: %s\n", pjsonBuffer);
 		AzureIoT_SendMessage(pjsonBuffer);
@@ -254,7 +275,14 @@ int initI2c(void) {
 	}
 
 	// Start OLED
-	oled_init();
+	if (oled_init())
+	{
+		Log_Debug("OLED not found!\n");
+	}
+	else
+	{
+		Log_Debug("OLED found!\n");
+	}
 
 	// Draw AVNET logo
 	//oled_draw_logo();

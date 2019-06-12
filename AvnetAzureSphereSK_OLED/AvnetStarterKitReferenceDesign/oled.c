@@ -15,6 +15,9 @@ network_var network_data;
 // Data of light sensor
 float light_sensor;
 
+// Altitude
+extern float altitude;
+
 // Array with messages from Azure
 extern uint8_t oled_ms1[CLOUD_MSG_SIZE];
 extern uint8_t oled_ms2[CLOUD_MSG_SIZE];
@@ -27,10 +30,14 @@ extern uint8_t lsm6dso_status;
 extern uint8_t lps22hh_status;
 
 
-//// oled
-void oled_init()
+/**
+  * @brief  OLED initialization.
+  * @param  None.
+  * @retval Positive if was unsuccefully, zero if was succefully.
+  */
+uint8_t oled_init()
 {
-	sd1306_init();
+	return sd1306_init();
 }
 
 // State machine to change the OLED status
@@ -100,8 +107,6 @@ void update_oled()
   */
 void oled_i2c_bus_status(uint8_t sensor_number)
 {
-	uint32_t i;
-	uint8_t string_data[10];
 
 	// Strings for labels
 	uint8_t str_bus_sta[]   = "I2C Bus Status:";
@@ -259,7 +264,6 @@ uint16_t get_channel(uint16_t freq_MHz)
   */
 void update_network()
 {
-	uint16_t i;
 	uint8_t string_data[10];
 	uint16_t channel;
 	uint8_t aux_size;
@@ -453,22 +457,14 @@ void update_environ(float temp1, float temp2, float atm)
 {
 	uint32_t i;
 	uint8_t string_data[10];
-	float altitude;
-
+	
 	// Strings for labels
 	uint8_t str_temp1[] = "Temp1:";
 	uint8_t str_temp2[] = "Temp2:";
 	uint8_t str_atm[] = "Atm:"; 
 	uint8_t str_altitude[] = "Alt:";
 
-/*
-	The ALTITUDE value calculated is actually "Pressure Altitude". This lacks correction for temperature (and humidity)  
-	"pressure altitude" calculator located at: https://www.weather.gov/epz/wxcalc_pressurealtitude
-	"pressure altitude" formula is defined at: https://www.weather.gov/media/epz/wxcalc/pressureAltitude.pdf 
-	 altitude in feet = 145366.45 * (1 - (hPa / 1013.25) ^ 0.190284) feet
-	 altitude in meters = 145366.45 * 0.3048 * (1 - (hPa / 1013.25) ^ 0.190284) meters
-*/
-	altitude = 44307.69396 * (1 - powf((atm / 1013.25), 0.190284));  // pressure altitude in meters
+
 
 	// Clear OLED buffer
 	clear_oled_buffer();
@@ -774,7 +770,7 @@ const unsigned char Image_avnet_bmp[BUFFER_SIZE] =
 uint8_t get_str_size(uint8_t * str)
 {
 	uint8_t legth = 0;
-	while (*str != NULL)
+	while (*(str) != NULL)
 	{
 		str++;
 		legth++;

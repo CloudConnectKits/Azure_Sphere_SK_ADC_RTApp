@@ -157,11 +157,6 @@ void deviceTwinChangedHandler(JSON_Object * desiredProperties)
 {
 	int result = 0;
 
-	//// OLED
-	uint8_t * ptr_data_str;
-	uint8_t array_to_send_string[24];
-	int j;
-
 	// Pull the twin version out of the message.  We use this value when we echo the new setting back to IoT Connect.
 	if (json_object_has_value(desiredProperties, "$version") != 0)
 	{
@@ -207,37 +202,6 @@ void deviceTwinChangedHandler(JSON_Object * desiredProperties)
 				Log_Debug("Received device update. New %s is %s\n", twinArray[i].twinKey, (char*)twinArray[i].twinVar);
 				checkAndUpdateDeviceTwin(twinArray[i].twinKey, twinArray[i].twinVar, TYPE_STRING, true);
 				break;
-/*
-			case TYPE_STRING:
-				ptr_data_str = json_object_get_string(currentJSONProperties, "value");
-
-				for (j = 0; j < CLOUD_MSG_SIZE; j++)
-				{
-					*(char*)(twinArray[i].twinVar + j) = *(ptr_data_str + j);
-				}
-
-				Log_Debug(twinArray[i].twinVar);
-				Log_Debug("\n");
-
-				// Add " at the begining to make the string compatible with JSON
-				array_to_send_string[0] = '"';
-
-				// Copy twinArray[i].twinVar to array
-				j = 0;
-				while ((char*)(twinArray[i].twinVar+j) != NULL && j < CLOUD_MSG_SIZE)
-				{
-					array_to_send_string[j + 1] = (char*)(twinArray[i].twinVar + j);
-					j++;
-				}
-				// Add " at the end
-				array_to_send_string[j + 1] = '"';
-				// Add \0 to finish string
-				array_to_send_string[j + 2] = NULL;
-
-				checkAndUpdateDeviceTwin(twinArray[i].twinKey, array_to_send_string, TYPE_STRING, true);
-				//Log_Debug("ERROR: TYPE_STRING case not implemented!");
-				break;
-*/
 			}
 		}
 	}
@@ -277,23 +241,6 @@ void deviceTwinChangedHandler(JSON_Object * desiredProperties)
 				Log_Debug("Received device update. New %s is %s\n", twinArray[i].twinKey, (char*)twinArray[i].twinVar);
 				checkAndUpdateDeviceTwin(twinArray[i].twinKey, twinArray[i].twinVar, TYPE_STRING, true);
 				break;
-/*
-			case TYPE_STRING:
-
-				ptr_data_str = json_object_get_string(desiredProperties, twinArray[i].twinKey);
-
-				for (int j = 0; j < CLOUD_MSG_SIZE; j++)
-				{
-					(char*)(twinArray[i].twinVar+j) = *(ptr_data_str +j);
-				}
-				
-				Log_Debug(twinArray[i].twinVar);
-				Log_Debug("\n");
-				
-				checkAndUpdateDeviceTwin(twinArray[i].twinKey, twinArray[i].twinVar, TYPE_STRING, true);
-	
-				break;
-*/
 			}
 		}
 	}

@@ -3,7 +3,7 @@
 #include <applibs/gpio.h>
 #include "parson.h"
 
-#define JSON_BUFFER_SIZE 128
+#define JSON_BUFFER_SIZE 168
 
 #define CLOUD_MSG_SIZE 22
 

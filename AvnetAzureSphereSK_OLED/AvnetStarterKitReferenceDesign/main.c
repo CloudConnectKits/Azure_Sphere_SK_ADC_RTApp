@@ -14,7 +14,7 @@
    Using the Avnet Azure Sphere Starter Kit demonstrate the following features
 
    1. Read X,Y,Z accelerometer data from the onboard LSM6DSO device using the I2C Interface
-   2. Read X,YZ Angular rate data from the onboard LSM6DSO device using the I2C Interface
+   2. Read X,Y,Z Angular rate data from the onboard LSM6DSO device using the I2C Interface
    3. Read the barometric pressure from the onboard LPS22HH device using the I2C Interface
    4. Read the temperature from the onboard LPS22HH device using the I2C Interface
    5. Read the state of the A and B buttons
@@ -70,8 +70,6 @@
 #include <sys/socket.h>
 #include <applibs/application.h>
 
-
-
 // Provide local access to variables in other files
 extern twin_t twinArray[];
 extern int twinArraySize;
@@ -88,6 +86,14 @@ static int buttonPollTimerFd = -1;
 static int buttonAGpioFd = -1;
 static int buttonBGpioFd = -1;
 
+int userLedRedFd = -1;
+int userLedGreenFd = -1;
+int userLedBlueFd = -1;
+int appLedFd = -1;
+int wifiLedFd = -1;
+int clickSocket1Relay1Fd = -1;
+int clickSocket1Relay2Fd = -1;
+
 //// ADC connection
 static const char rtAppComponentId[] = "005180bc-402f-4cb3-a662-72937dbcde47";
 static int sockFd = -1;
@@ -101,14 +107,6 @@ uint8_t RTCore_status;
 static EventData timerEventData = { .eventHandler = &TimerEventHandler };
 static EventData socketEventData = { .eventHandler = &SocketEventHandler };
 //// end ADC connection
-
-int userLedRedFd = -1;
-int userLedGreenFd = -1;
-int userLedBlueFd = -1;
-int appLedFd = -1;
-int wifiLedFd = -1;
-int clickSocket1Relay1Fd = -1;
-int clickSocket1Relay2Fd = -1;
 
 // Button state variables, initilize them to button not-pressed (High)
 static GPIO_Value_Type buttonAState = GPIO_Value_High;
@@ -260,6 +258,7 @@ static void SocketEventHandler(EventData *eventData)
 		terminationRequired = true;
 	}
 
+	// Copy data from Rx buffer to analog_data union
 	for (int i = 0; i < sizeof(analog_data); i++)
 	{
 		analog_data.u8[i] = rxBuf[i];
@@ -273,16 +272,9 @@ static void SocketEventHandler(EventData *eventData)
 	// We can simplify the factors, but for demostration purpose it's OK
 	light_sensor = ((float)analog_data.u32*2.5/4095)*1000000 / (3650*0.1428);
 
-	Log_Debug("Received %d bytes: ", bytesReceived);
+	Log_Debug("Received %d bytes. ", bytesReceived);
 
-	Log_Debug("Light intensity: %f Lux", light_sensor);
-
-	/*
-	for (int i = 0; i < bytesReceived; ++i) {
-		Log_Debug("%c", isprint(rxBuf[i]) ? rxBuf[i] : '.');
-	}
-	*/
-	Log_Debug("\n");
+	Log_Debug("\n");	
 }
 
 /// <summary>
@@ -311,7 +303,8 @@ static void SendMessageToRTCore(void)
 	Log_Debug("Sending: %s\n", txMessage);
 
 	int bytesSent = send(sockFd, txMessage, strlen(txMessage), 0);
-	if (bytesSent == -1) {
+	if (bytesSent == -1)
+	{
 		Log_Debug("ERROR: Unable to send message: %d (%s)\n", errno, strerror(errno));
 		terminationRequired = true;
 		return;
@@ -337,14 +330,14 @@ static int InitPeripheralsAndHandlers(void)
     }
 
 	//// ADC connection
-	 
-	
+	 	
 	// Open connection to real-time capable application.
 	sockFd = Application_Socket(rtAppComponentId);
 	if (sockFd == -1) 
 	{
 		Log_Debug("ERROR: Unable to create socket: %d (%s)\n", errno, strerror(errno));
-		Log_Debug("The program will continue without showing light sensor data\n");
+		Log_Debug("Real Time Core disabled or Component Id is not correct.\n");
+		Log_Debug("The program will continue without showing light sensor data.\n");
 		// Communication with RT core error
 		RTCore_status = 1;
 		//return -1;

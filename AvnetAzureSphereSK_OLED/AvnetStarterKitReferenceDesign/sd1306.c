@@ -74,12 +74,15 @@ int32_t sd1306_write_data(uint8_t addr, uint8_t *data)
 /**
   * @brief  Initialize sd1306.
   * @param  None.
-  * @retval None.
+  * @retval Positive if was unsuccefully, zero if was succefully.
   */
-void sd1306_init(void)
+uint8_t sd1306_init(void)
 {
-	// OLED turn off
-	sd1306_send_command(sd1306_ADDR, 0xae);
+	// OLED turn off and check if OLED is connected
+	if (sd1306_send_command(sd1306_ADDR, 0xae) < 0)
+	{
+		return 1;
+	}
 	// Set display oscillator freqeuncy and divide ratio
 	sd1306_send_command(sd1306_ADDR, 0xd5);
 	sd1306_send_command(sd1306_ADDR, 0x50);
@@ -151,6 +154,8 @@ void sd1306_init(void)
 	sd1306_send_command(sd1306_ADDR, 0x00);
 	// Last Page
 	sd1306_send_command(sd1306_ADDR, 0x07);
+
+	return 0;
 }
 
 /**
@@ -886,13 +891,11 @@ void sd1306_draw_arc(int32_t x, int32_t y, int32_t radius, int32_t a0, int32_t a
 	b = radius;
 	P = 0x01 - radius;
 
-	int32_t x0, y0;
 	int32_t angle;
 
 	do
 	{
-		x0 = a + x;
-		y0 = b + y;
+
 
 		angle = atan2f(b, a)*180.0 / 3.14;
 
@@ -913,8 +916,7 @@ void sd1306_draw_arc(int32_t x, int32_t y, int32_t radius, int32_t a0, int32_t a
 			}
 		}
 
-		x0 = b + x;
-		y0 = a + y;
+
 
 		angle = atan2f(a, b)*180.0 / 3.14;
 
@@ -935,8 +937,7 @@ void sd1306_draw_arc(int32_t x, int32_t y, int32_t radius, int32_t a0, int32_t a
 			}
 		}
 
-		x0 = x - a;
-		y0 = y + b;
+
 
 		angle = atan2f(b, -a)*180.0 / 3.14;
 
@@ -957,8 +958,6 @@ void sd1306_draw_arc(int32_t x, int32_t y, int32_t radius, int32_t a0, int32_t a
 			}
 		}
 
-		x0 = x - b;
-		y0 = y + a;
 
 		angle = atan2f(a, -b)*180.0 / 3.14;
 
@@ -979,8 +978,6 @@ void sd1306_draw_arc(int32_t x, int32_t y, int32_t radius, int32_t a0, int32_t a
 			}
 		}
 
-		x0 = x + b;
-		y0 = y - a;
 
 		angle = atan2f(-a, b)*180.0 / 3.14;
 
@@ -1001,8 +998,7 @@ void sd1306_draw_arc(int32_t x, int32_t y, int32_t radius, int32_t a0, int32_t a
 			}
 		}
 
-		x0 = x + a;
-		y0 = y - b;
+
 
 		angle = atan2f(-b, a)*180.0 / 3.14;
 
@@ -1023,8 +1019,7 @@ void sd1306_draw_arc(int32_t x, int32_t y, int32_t radius, int32_t a0, int32_t a
 			}
 		}
 
-		x0 = x - a;
-		y0 = y - b;
+
 
 		angle = atan2f(-b, -a)*180.0 / 3.14;
 
@@ -1045,8 +1040,7 @@ void sd1306_draw_arc(int32_t x, int32_t y, int32_t radius, int32_t a0, int32_t a
 			}
 		}
 
-		x0 = x - b;
-		y0 = y - a;
+
 
 		angle = atan2f(-a, -b)*180.0 / 3.14;
 
