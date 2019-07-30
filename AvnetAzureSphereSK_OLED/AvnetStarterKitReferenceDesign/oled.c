@@ -461,11 +461,19 @@ void update_environ(float temp1, float temp2, float atm)
 	// Strings for labels
 	uint8_t str_temp1[] = "Temp1:";
 	uint8_t str_temp2[] = "Temp2:";
-	uint8_t str_atm[] = "Atm:"; 
-	uint8_t str_altitude[] = "Alt:";
+	uint8_t str_atm[] = "Barom:";
+	uint8_t str_altitude[] = "Elev :";
 
-
-
+/*
+	The ALTITUDE value calculated is actually "Pressure Altitude". This lacks correction for temperature (and humidity)
+	"pressure altitude" calculator located at: https://www.weather.gov/epz/wxcalc_pressurealtitude
+	"pressure altitude" formula is defined at: https://www.weather.gov/media/epz/wxcalc/pressureAltitude.pdf
+	 altitude in feet = 145366.45 * (1 - (hPa / 1013.25) ^ 0.1902.84) feet
+	 altitude in meters = 145366.45 * 0.3048 * (1 - (hPa / 1013.25) ^ 0.190284) meters
+*/
+	altitude = 44307.69396 * (1 - powf((atm / 1013.25), 0.190284));  // altitude in meters
+	/// altitude = 44330 * (1 - powf((atm / 1013.25), (1/5.255)));   // formula for altitude in meters, as detailed in Bosch BMP180 datasheet 
+	
 	// Clear OLED buffer
 	clear_oled_buffer();
 
