@@ -3,7 +3,7 @@
 
    /************************************************************************************************
    Name: AvnetStarterKitReferenceDesign
-   Sphere OS: 19.02
+   Sphere OS: 19.05
    This file contains the 'main' function. Program execution begins and ends there
 
    Authors:

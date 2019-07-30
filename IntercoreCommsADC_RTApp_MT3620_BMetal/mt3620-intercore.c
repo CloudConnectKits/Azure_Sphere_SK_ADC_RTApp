@@ -166,7 +166,7 @@ int DequeueData(BufferHeader *outbound, BufferHeader *inbound, uint32_t bufSize,
     uint32_t remoteWritePosition = inbound->writePosition;
     uint32_t localReadPosition = outbound->readPosition;
 
-    if (remoteWritePosition >= bufSize) {
+	if (remoteWritePosition >= bufSize) {
         Uart_WriteStringPoll("DequeueData: remoteWritePosition invalid\r\n");
         return -1;
     }

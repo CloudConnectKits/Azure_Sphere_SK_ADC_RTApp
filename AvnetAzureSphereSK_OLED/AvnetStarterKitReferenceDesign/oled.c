@@ -1,8 +1,10 @@
-
+/***************************************************************************************************
+   Name: OLED.c
+   Sphere OS: 19.05
+****************************************************************************************************/
 
 #include "oled.h"
 #include <math.h>
-
 
 uint8_t oled_state = 0;
 
@@ -28,7 +30,6 @@ extern uint8_t oled_ms4[CLOUD_MSG_SIZE];
 extern uint8_t RTCore_status;
 extern uint8_t lsm6dso_status;
 extern uint8_t lps22hh_status;
-
 
 /**
   * @brief  OLED initialization.
@@ -221,9 +222,7 @@ void oled_i2c_bus_status(uint8_t sensor_number)
 		break;
 		default:
 		break;
-
 	}
-
 
 	// Send the buffer to OLED RAM
 	sd1306_refresh();
@@ -464,16 +463,6 @@ void update_environ(float temp1, float temp2, float atm)
 	uint8_t str_atm[] = "Barom:";
 	uint8_t str_altitude[] = "Elev :";
 
-/*
-	The ALTITUDE value calculated is actually "Pressure Altitude". This lacks correction for temperature (and humidity)
-	"pressure altitude" calculator located at: https://www.weather.gov/epz/wxcalc_pressurealtitude
-	"pressure altitude" formula is defined at: https://www.weather.gov/media/epz/wxcalc/pressureAltitude.pdf
-	 altitude in feet = 145366.45 * (1 - (hPa / 1013.25) ^ 0.1902.84) feet
-	 altitude in meters = 145366.45 * 0.3048 * (1 - (hPa / 1013.25) ^ 0.190284) meters
-*/
-	altitude = 44307.69396 * (1 - powf((atm / 1013.25), 0.190284));  // altitude in meters
-	/// altitude = 44330 * (1 - powf((atm / 1013.25), (1/5.255)));   // formula for altitude in meters, as detailed in Bosch BMP180 datasheet 
-	
 	// Clear OLED buffer
 	clear_oled_buffer();
 
@@ -785,8 +774,3 @@ uint8_t get_str_size(uint8_t * str)
 	}
 	return legth;
 }
-
-
-
-
-

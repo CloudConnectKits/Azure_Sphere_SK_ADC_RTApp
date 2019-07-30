@@ -209,7 +209,7 @@ void AccelTimerEventHandler(EventData *eventData)
 	// Bosch's formula
 	altitude = 44330 * (1 - powf((pressure_hPa / 1013.25), 1 / 5.255));  // pressure altitude in meters
 
-	Log_Debug("ALSPT19: Light intst. [Lux] : %.2f\r\n", light_sensor);
+	Log_Debug("ALSPT19: Ambient Light[Lux] : %.2f\r\n", light_sensor);
 
 	//// OLED
 	update_oled();
@@ -226,15 +226,9 @@ void AccelTimerEventHandler(EventData *eventData)
 		if (pjsonBuffer == NULL) {
 			Log_Debug("ERROR: not enough memory to send telemetry");
 		}
-
-		// construct the telemetry message
-		/*
-		snprintf(pjsonBuffer, JSON_BUFFER_SIZE, "{\"gX\":\"%.4lf\", \"gY\":\"%.4lf\", \"gZ\":\"%.4lf\", \"pressure\": \"%.2f\", \"aX\": \"%4.2f\", \"aY\": \"%4.2f\", \"aZ\": \"%4.2f\"}",
-			acceleration_mg[0], acceleration_mg[1], acceleration_mg[2], pressure_hPa, angular_rate_dps[0], angular_rate_dps[1], angular_rate_dps[2]);
-		*/
-
-		snprintf(pjsonBuffer, JSON_BUFFER_SIZE, "{\"gX\":\"%.4lf\", \"gY\":\"%.4lf\", \"gZ\":\"%.4lf\", \"pressure\": \"%.2f\", \"aX\": \"%4.2f\", \"aY\": \"%4.2f\", \"aZ\": \"%4.2f\", \"light_intensity\": \"%.2f\", \"altitude\": \"%.2f\"}",
-			acceleration_mg[0], acceleration_mg[1], acceleration_mg[2], pressure_hPa, angular_rate_dps[0], angular_rate_dps[1], angular_rate_dps[2], light_sensor, altitude);
+		
+		snprintf(pjsonBuffer, JSON_BUFFER_SIZE, "{\"gX\":\"%.2lf\", \"gY\":\"%.2lf\", \"gZ\":\"%.2lf\", \"aX\": \"%.2f\", \"aY\": \"%.2f\", \"aZ\": \"%.2f\", \"pressure\": \"%.2f\", \"light_intensity\": \"%.2f\", \"altitude\": \"%.2f\", \"temp\": \"%.2f\",  \"rssi\": \"%d\"}",
+			angular_rate_dps[0], angular_rate_dps[1], angular_rate_dps[2], acceleration_mg[0], acceleration_mg[1], acceleration_mg[2], pressure_hPa, light_sensor, altitude, lsm6dsoTemperature_degC, network_data.rssi);
 
 		Log_Debug("\n[Info] Sending telemetry: %s\n", pjsonBuffer);
 		AzureIoT_SendMessage(pjsonBuffer);
