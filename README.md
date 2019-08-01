@@ -1,9 +1,12 @@
 
-# Sample: Inter-core communication ADC
+# Azure Sphere Starter Kit Advanced Tutorial
 
-This sample demonstrates how to exchange messages between applications running on the high-level and real-time capable cores.
+The A7 and M4 applications here are based on C code from various sources:
+1) Avnet's Starter Kit Out-of-Box demo code 
+2) Microsoft's "Inter-core Communication ADC" sample code 
+3) A number of custom enhancements (OLED display messaging support with local- and cloud-sourced content, elevation calculation, inclusion of additional parameters in the telemetry message payload, etc)  
 
-Once per second the high-level application sends a message "Read-ADC-%d", where %d is an incrementing counter to the real-time capable application. The real-time capable application prints the received data, reads the ADC channel 0 (light sensor) and sends it back to the high-level application.
+The Microsoft Inter-core Communication ADC sample code demonstrates how to exchange messages between applications running on the high-level and real-time capable cores. Once per second the high-level application sends a message "Read-ADC-%d", where %d is an incrementing counter to the real-time capable application. The real-time capable application prints the received data (to UART IO0, available via pins 1 and 3 on header J9), reads the ADC channel 0 (light sensor) and sends the measured value to the high-level application.
 
 The high-level application uses the following Azure Sphere libraries and includes [beta APIs](https://docs.microsoft.com/azure-sphere/app-development/use-beta):
 
