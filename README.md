@@ -6,7 +6,9 @@ The A7 and M4 applications here are based on C code from various sources:
 2) Microsoft's "Inter-core Communication ADC" sample code 
 3) New custom enhancements from Avid and Avnet developers (OLED display messaging support with local- and cloud-sourced content, elevation calculation, inclusion of additional parameters in the telemetry message payload, etc)  
 
-The Microsoft Inter-core Communication ADC sample code demonstrates how to exchange messages between applications running on the high-level and real-time capable cores. Once per second the high-level application sends a message "Read-ADC-%d", where %d is an incrementing counter to the real-time capable application. The real-time capable application prints the received data (to UART IO0, available via pins 1 and 3 on header J9), reads the ADC channel 0 (light sensor) and sends the measured value to the high-level application.
+For full step-by-step procedure and clarifying details, refer to the Azure Sphere Advanced Tutorial blog posting on Element14
+
+The Microsoft Inter-core Communication ADC sample code demonstrates how to exchange messages between applications running on the high-level and real-time capable cores. Once per second the high-level application sends a message "Read-ADC-%d", where %d is an incrementing counter to the real-time capable application. The real-time capable application prints the received data (output on the M4 UART IO0, that can be accessed via pins 1 and 3 on header J11), reads the ADC channel 0 (light sensor) and sends the measured value to the high-level application.
 
 The high-level application uses the following Azure Sphere libraries and includes [beta APIs](https://docs.microsoft.com/azure-sphere/app-development/use-beta):
 
