@@ -4,7 +4,7 @@
 The A7 and M4 applications here are based on C code from various sources:
 1) Avnet's Starter Kit Out-of-Box demo code 
 2) Microsoft's "Inter-core Communication ADC" sample code 
-3) A number of custom enhancements (OLED display messaging support with local- and cloud-sourced content, elevation calculation, inclusion of additional parameters in the telemetry message payload, etc)  
+3) New custom enhancements from Avid and Avnet developers (OLED display messaging support with local- and cloud-sourced content, elevation calculation, inclusion of additional parameters in the telemetry message payload, etc)  
 
 The Microsoft Inter-core Communication ADC sample code demonstrates how to exchange messages between applications running on the high-level and real-time capable cores. Once per second the high-level application sends a message "Read-ADC-%d", where %d is an incrementing counter to the real-time capable application. The real-time capable application prints the received data (to UART IO0, available via pins 1 and 3 on header J9), reads the ADC channel 0 (light sensor) and sends the measured value to the high-level application.
 
@@ -16,7 +16,6 @@ The high-level application uses the following Azure Sphere libraries and include
 |log.h |Displays messages in the Visual Studio Device Output window during debugging |
 
 The real-time capable features used in the sample are in Beta.
-
 
 To use this sample, clone the repository locally if you haven't already done so:
 
@@ -50,10 +49,10 @@ git clone https://github.com/CloudConnectKits/Azure_Sphere_SK_ADC_RTApp.git
 **Set up hardware to display output**
 
 To set up the hardware to display output from the Hello World sample, follow these steps.
-1. Connect GND on the breakout adapter to Header 3, pin 2 (GND) on the MT3620 RDB.
-1. Connect RX on the breakout adapter to Header 3, pin 6 (real-time core TX) on the MT3620 RDB.
-1. Attach the breakout adapter to a USB port on your PC.
-1. Determine which COM port the adapter uses on the PC.
+1. Connect the RxD wire of USB-Serial Adapter to J11 pin 1 (IO0_TXD)
+1. Connect the GND wire of USB-Serial Adapter to J11 pin 3 (GND)
+1. Attach the USB-Serial Adapter to a USB port on your PC.
+1. Determine which COM port the adapter uses on your PC.
     1. Start Device Manager. 
     1. Select **View&gt;Devices by container**, 
     1. Look for your adapter and note the number of the assigned COM port.
