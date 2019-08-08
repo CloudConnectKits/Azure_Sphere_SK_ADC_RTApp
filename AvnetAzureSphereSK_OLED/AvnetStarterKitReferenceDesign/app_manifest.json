@@ -7,8 +7,8 @@
   "Capabilities": {
     //// M4 application connection (M4 application's ComponentID)
     "AllowedApplicationConnections": [ "005180bc-402f-4cb3-a662-72937dbcde47" ],
-    //// IoT Central application connection (Replace xxxx placeholder with your IOTC application's ComponentID)
-    "AllowedConnections": [ "iotc-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.azure-devices.net" ],
+    //// IoT Central application connection (Replace the placeholder below with your IOTC application's ComponentID)
+    //// "AllowedConnections": [ "iotc-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.azure-devices.net" ],
     "AllowedTcpServerPorts": [],
     "AllowedUdpServerPorts": [],
     "Gpio": [ 0, 4, 5, 8, 9, 10, 12, 13, 34, 1 ],
