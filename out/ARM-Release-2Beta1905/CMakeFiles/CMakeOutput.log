@@ -1,0 +1,86 @@
+The target system is: Generic -  - 
+The host system is: Windows - 10.0.15063 - AMD64
+Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+Compiler: C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Linux/gcc_arm/bin/arm-none-eabi-gcc.exe 
+Build flags: 
+Id flags: -c 
+
+The output was:
+0
+
+
+Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CMakeCCompilerId.o"
+
+The C compiler identification is GNU, found in "C:/Users/016424/source/repos/Azure_Sphere_SK_ADC_RTApp/out/ARM-Release-2Beta1905/CMakeFiles/3.12.18081601-MSVC_2/CompilerIdC/CMakeCCompilerId.o"
+
+Determining if the C compiler works passed with the following output:
+Change Dir: C:/Users/016424/source/repos/Azure_Sphere_SK_ADC_RTApp/out/ARM-Release-2Beta1905/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe" "cmTC_792a7"
+[1/2] Building C object CMakeFiles/cmTC_792a7.dir/testCCompiler.c.obj
+[2/2] Linking C static library libcmTC_792a7.a
+
+
+Detecting C compiler ABI info compiled with the following output:
+Change Dir: C:/Users/016424/source/repos/Azure_Sphere_SK_ADC_RTApp/out/ARM-Release-2Beta1905/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe" "cmTC_822c6"
+[1/2] Building C object CMakeFiles/cmTC_822c6.dir/CMakeCCompilerABI.c.obj
+[2/2] Linking C static library libcmTC_822c6.a
+
+
+Parsed C implicit link information from above output:
+  link line regex: [^( *|.*[/\])(arm-none-eabi-ld\.exe|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\]+-)?ld|collect2)[^/\]*( |$)]
+  ignore line: [Change Dir: C:/Users/016424/source/repos/Azure_Sphere_SK_ADC_RTApp/out/ARM-Release-2Beta1905/CMakeFiles/CMakeTmp]
+  ignore line: []
+  ignore line: [Run Build Command:"C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe" "cmTC_822c6"]
+  ignore line: [[1/2] Building C object CMakeFiles/cmTC_822c6.dir/CMakeCCompilerABI.c.obj]
+  ignore line: [[2/2] Linking C static library libcmTC_822c6.a]
+  ignore line: []
+  implicit libs: []
+  implicit dirs: []
+  implicit fwks: []
+
+
+
+
+Detecting C [-std=c11] compiler features compiled with the following output:
+Change Dir: C:/Users/016424/source/repos/Azure_Sphere_SK_ADC_RTApp/out/ARM-Release-2Beta1905/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe" "cmTC_290a1"
+[1/2] Building C object CMakeFiles/cmTC_290a1.dir/feature_tests.c.obj
+[2/2] Linking C static library libcmTC_290a1.a
+
+
+    Feature record: C_FEATURE:1c_function_prototypes
+    Feature record: C_FEATURE:1c_restrict
+    Feature record: C_FEATURE:1c_static_assert
+    Feature record: C_FEATURE:1c_variadic_macros
+
+
+Detecting C [-std=c99] compiler features compiled with the following output:
+Change Dir: C:/Users/016424/source/repos/Azure_Sphere_SK_ADC_RTApp/out/ARM-Release-2Beta1905/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe" "cmTC_b5ddf"
+[1/2] Building C object CMakeFiles/cmTC_b5ddf.dir/feature_tests.c.obj
+[2/2] Linking C static library libcmTC_b5ddf.a
+
+
+    Feature record: C_FEATURE:1c_function_prototypes
+    Feature record: C_FEATURE:1c_restrict
+    Feature record: C_FEATURE:1c_static_assert
+    Feature record: C_FEATURE:1c_variadic_macros
+
+
+Detecting C [-std=c90] compiler features compiled with the following output:
+Change Dir: C:/Users/016424/source/repos/Azure_Sphere_SK_ADC_RTApp/out/ARM-Release-2Beta1905/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe" "cmTC_28df4"
+[1/2] Building C object CMakeFiles/cmTC_28df4.dir/feature_tests.c.obj
+[2/2] Linking C static library libcmTC_28df4.a
+
+
+    Feature record: C_FEATURE:1c_function_prototypes
+    Feature record: C_FEATURE:1c_restrict
+    Feature record: C_FEATURE:1c_static_assert
+    Feature record: C_FEATURE:1c_variadic_macros

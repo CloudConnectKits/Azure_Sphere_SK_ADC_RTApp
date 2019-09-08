@@ -1,0 +1,4 @@
+C:/Users/016424/source/repos/Azure_Sphere_SK_ADC_RTApp/out/ARM-Release-2Beta1905/CMakeFiles/edit_cache.dir
+C:/Users/016424/source/repos/Azure_Sphere_SK_ADC_RTApp/out/ARM-Release-2Beta1905/CMakeFiles/IntercoreCommsADC_RTApp_MT3620_BMetal.dir
+C:/Users/016424/source/repos/Azure_Sphere_SK_ADC_RTApp/out/ARM-Release-2Beta1905/CMakeFiles/MakeImage.dir
+C:/Users/016424/source/repos/Azure_Sphere_SK_ADC_RTApp/out/ARM-Release-2Beta1905/CMakeFiles/rebuild_cache.dir

@@ -85,6 +85,7 @@ int epollFd = -1;
 static int buttonPollTimerFd = -1;
 static int buttonAGpioFd = -1;
 static int buttonBGpioFd = -1;
+static int button_BleLED_GpioFd = -1;
 
 int userLedRedFd = -1;
 int userLedGreenFd = -1;
@@ -93,6 +94,8 @@ int appLedFd = -1;
 int wifiLedFd = -1;
 int clickSocket1Relay1Fd = -1;
 int clickSocket1Relay2Fd = -1;
+// int bleLedBlueFd = -1;
+int bleButtonFd = -1;
 
 //// ADC connection
 static const char rtAppComponentId[] = "005180bc-402f-4cb3-a662-72937dbcde47";
@@ -111,6 +114,7 @@ static EventData socketEventData = { .eventHandler = &SocketEventHandler };
 // Button state variables, initilize them to button not-pressed (High)
 static GPIO_Value_Type buttonAState = GPIO_Value_High;
 static GPIO_Value_Type buttonBState = GPIO_Value_High;
+static GPIO_Value_Type button_BleLED_State = GPIO_Value_High;
 
 #if (defined(IOT_CENTRAL_APPLICATION) || defined(IOT_HUB_APPLICATION))
 	bool versionStringSent = false;
@@ -139,15 +143,43 @@ static void ButtonTimerEventHandler(EventData *eventData)
 
 	bool sendTelemetryButtonA = false;
 	bool sendTelemetryButtonB = false;
+	bool sendTelemetryBleLED  = false;
 
 	if (ConsumeTimerFdEvent(buttonPollTimerFd) != 0) {
 		terminationRequired = true;
 		return;
 	}
 
+	// Check for nRF Blinky LED switch transition (BleLED) 
+	GPIO_Value_Type newButton_BleLED_State;
+	int result = GPIO_GetValue(button_BleLED_GpioFd, &newButton_BleLED_State);
+	if (result != 0) {
+		Log_Debug("ERROR: Could not read BleLED GPIO: %s (%d).\n", strerror(errno), errno);
+		terminationRequired = true;
+		return;
+	}
+
+	// If the nRF BleLED has just changed, send a telemetry message
+	// The button has GPIO_Value_Low when pressed and GPIO_Value_High when released
+	if (newButton_BleLED_State != button_BleLED_State) {
+		if (newButton_BleLED_State == GPIO_Value_Low) {
+			Log_Debug("BleLED = ON!\n");
+			sendTelemetryBleLED = true;
+		}
+		else {
+			Log_Debug("BleLED = OFF!\n");
+			sendTelemetryBleLED = true;
+		}
+
+		// Update the static variable to use next time we enter this routine
+		button_BleLED_State = newButton_BleLED_State;
+	}
+
+///////////////////////////
+
 	// Check for button A press
 	GPIO_Value_Type newButtonAState;
-	int result = GPIO_GetValue(buttonAGpioFd, &newButtonAState);
+	result = GPIO_GetValue(buttonAGpioFd, &newButtonAState);
 	if (result != 0) {
 		Log_Debug("ERROR: Could not read button GPIO: %s (%d).\n", strerror(errno), errno);
 		terminationRequired = true;
@@ -207,11 +239,18 @@ static void ButtonTimerEventHandler(EventData *eventData)
 	}
 	
 	// If either button was pressed, then enter the code to send the telemetry message
-	if (sendTelemetryButtonA || sendTelemetryButtonB) {
+	if (sendTelemetryButtonA || sendTelemetryButtonB || sendTelemetryBleLED) {
 
 		char *pjsonBuffer = (char *)malloc(JSON_BUFFER_SIZE);
 		if (pjsonBuffer == NULL) {
 			Log_Debug("ERROR: not enough memory to send telemetry");
+		}
+
+		if (sendTelemetryBleLED) {
+			// construct the telemetry message  for Button A
+			snprintf(pjsonBuffer, JSON_BUFFER_SIZE, cstrButtonTelemetryJson, "bleLedBlue", newButton_BleLED_State);
+			Log_Debug("\n[Info] Sending telemetry %s\n", pjsonBuffer);
+			AzureIoT_SendMessage(pjsonBuffer);
 		}
 
 		if (sendTelemetryButtonA) {
@@ -227,6 +266,8 @@ static void ButtonTimerEventHandler(EventData *eventData)
 			Log_Debug("\n[Info] Sending telemetry %s\n", pjsonBuffer);
 			AzureIoT_SendMessage(pjsonBuffer);
 		}
+
+
 
 		free(pjsonBuffer);
 	}
@@ -411,6 +452,15 @@ static int InitPeripheralsAndHandlers(void)
 		return -1;
 	}
 
+	// Open BleLED GPIO as input
+	Log_Debug("Opening Starter BLE LED GPIO as input.\n");
+	button_BleLED_GpioFd = GPIO_OpenAsInput(AVT_MODULE_GPIO2_PWM2);
+	if (button_BleLED_GpioFd < 0) {
+		Log_Debug("ERROR: Could not open BleLED GPIO: %s (%d).\n", strerror(errno), errno);
+		return -1;
+	}
+
+
 	// Set up a timer to poll the buttons
 	
 	struct timespec buttonPressCheckPeriod = { 0, 1000000 };
@@ -438,6 +488,7 @@ static void ClosePeripheralsAndHandlers(void)
 	CloseFdAndPrintError(buttonPollTimerFd, "buttonPoll");
 	CloseFdAndPrintError(buttonAGpioFd, "buttonA");
 	CloseFdAndPrintError(buttonBGpioFd, "buttonB");
+	CloseFdAndPrintError(button_BleLED_GpioFd, "BleLED");
 
 	// Traverse the twin Array and for each GPIO item in the list the close the file descriptor
 	for (int i = 0; i < twinArraySize; i++) {

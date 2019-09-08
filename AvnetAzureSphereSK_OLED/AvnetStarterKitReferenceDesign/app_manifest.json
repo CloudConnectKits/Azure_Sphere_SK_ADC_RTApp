@@ -5,13 +5,14 @@
   "EntryPoint": "/bin/app",
   "CmdArgs": [ "Avnet-Starter-Kit-reference-V1.0" ],
   "Capabilities": {
-    //// M4 application connection (M4 application's ComponentID)
     "AllowedApplicationConnections": [ "005180bc-402f-4cb3-a662-72937dbcde47" ],
-    //// IoT Central application connection (Replace the placeholder below with your IOTC application's ComponentID)
-    //// "AllowedConnections": [ "iotc-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.azure-devices.net" ],
+    /// IoT Central application connection (Replace the xxxx placeholder with your IOTC application's ComponentID)
+    /// "AllowedConnections": [ "iotc-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.azure-devices.net" ],
+    "AllowedConnections": [ "iotc-c988bbc8-7deb-4d8f-a195-7d4119b6b656.azure-devices.net" ], // BLE FAE demo
+    /// "AllowedConnections": [ "iotc-7bca3736-e431-4de7-9b8f-acb63f28844b.azure-devices.net" ], // Advanced tutorial
     "AllowedTcpServerPorts": [],
     "AllowedUdpServerPorts": [],
-    "Gpio": [ 0, 4, 5, 8, 9, 10, 12, 13, 34, 1 ],
+    "Gpio": [ 0, 1, 2, 4, 5, 8, 9, 10, 12, 13, 34 ],
     "Uart": [],
     "I2cMaster": [ "ISU2" ],
     "SpiMaster": [],

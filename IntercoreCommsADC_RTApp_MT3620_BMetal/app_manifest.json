@@ -4,7 +4,7 @@
   "ComponentId": "005180bc-402f-4cb3-a662-72937dbcde47",
   "EntryPoint": "/bin/app",
   "Capabilities": {
-    //// A7 application connection (A7 application's ComponentID)
+    //// A7 application connection
     "AllowedApplicationConnections": [ "685f13af-25a5-40b2-8dd8-8cbc253ecbd8" ],
     "Adc": [ "ADC0" ]
   },
