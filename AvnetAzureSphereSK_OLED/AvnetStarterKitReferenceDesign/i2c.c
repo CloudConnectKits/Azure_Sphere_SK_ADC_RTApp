@@ -64,10 +64,11 @@ static float pressure_hPa;
 static float lps22hhTemperature_degC;
 
 static uint8_t whoamI, rst;
-static int accelTimerFd = -1;
+int accelTimerFd;
 const uint8_t lsm6dsOAddress = LSM6DSO_ADDRESS;     // Addr = 0x6A
 lsm6dso_ctx_t dev_ctx;
 lps22hh_ctx_t pressure_ctx;
+bool lps22hhDetected;
 
 float altitude;
 
@@ -75,7 +76,6 @@ float altitude;
 uint8_t lsm6dso_status = 1;
 uint8_t lps22hh_status = 1;
 uint8_t RTCore_status = 1;
-
 //Extern variables
 int i2cFd = -1;
 extern int epollFd;
@@ -165,78 +165,76 @@ void AccelTimerEventHandler(EventData *eventData)
 		Log_Debug("LSM6DSO: Temperature1 [degC]: %.2f\r\n", lsm6dsoTemperature_degC);
 	}
 
-	// Read the sensors on the lsm6dso device
+	// Read the lps22hh sensor on the lsm6dso device
 
-	lps22hh_read_reg(&pressure_ctx, LPS22HH_STATUS, (uint8_t *)&lps22hhReg, 1);
+	// Initialize the data structures to 0s.
+	memset(data_raw_pressure.u8bit, 0x00, sizeof(int32_t));
+	memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
 
-	//Read output only if new value is available
+	if (lps22hhDetected) {
+		lps22hh_read_reg(&pressure_ctx, LPS22HH_STATUS, (uint8_t *)&lps22hhReg, 1);
 
-	if ((lps22hhReg.status.p_da == 1) && (lps22hhReg.status.t_da == 1))
-	{
-		memset(data_raw_pressure.u8bit, 0x00, sizeof(int32_t));
-		lps22hh_pressure_raw_get(&pressure_ctx, data_raw_pressure.u8bit);
+		//Read output only if new value is available
 
-		pressure_hPa = lps22hh_from_lsb_to_hpa((uint32_t)data_raw_pressure.i32bit);
+		if ((lps22hhReg.status.p_da == 1) && (lps22hhReg.status.t_da == 1))
+		{
+			lps22hh_pressure_raw_get(&pressure_ctx, data_raw_pressure.u8bit);
 
-		memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
-		lps22hh_temperature_raw_get(&pressure_ctx, data_raw_temperature.u8bit);
-		lps22hhTemperature_degC = lps22hh_from_lsb_to_celsius(data_raw_temperature.i16bit);
+			pressure_hPa = lps22hh_from_lsb_to_hpa(data_raw_pressure.i32bit);
 
-		Log_Debug("LPS22HH: Pressure     [hPa] : %.2f\r\n", pressure_hPa);
-		Log_Debug("LPS22HH: Temperature2 [degC]: %.2f\r\n", lps22hhTemperature_degC);
+			lps22hh_temperature_raw_get(&pressure_ctx, data_raw_temperature.u8bit);
+			lps22hhTemperature_degC = lps22hh_from_lsb_to_celsius(data_raw_temperature.i16bit);
+
+			Log_Debug("LPS22HH: Pressure     [hPa] : %.2f\r\n", pressure_hPa);
+			Log_Debug("LPS22HH: Temperature2 [degC]: %.2f\r\n", lps22hhTemperature_degC);
+		}
+	}
+	// LPS22HH was not detected
+	else {
+
+		Log_Debug("LPS22HH: Pressure     [hPa] : Not read!\r\n");
+		Log_Debug("LPS22HH: Temperature  [degC]: Not read!\r\n");
 	}
 
-
-	sensor_data.acceleration_mg[0] = acceleration_mg[0];
-	sensor_data.acceleration_mg[1] = acceleration_mg[1];
-	sensor_data.acceleration_mg[2] = acceleration_mg[2];
-	sensor_data.angular_rate_dps[0] = angular_rate_dps[0];
-	sensor_data.angular_rate_dps[1] = angular_rate_dps[1];
-	sensor_data.angular_rate_dps[2] = angular_rate_dps[2];
-	sensor_data.lsm6dsoTemperature_degC = lsm6dsoTemperature_degC;
-	sensor_data.lps22hhpressure_hPa = pressure_hPa;
-	sensor_data.lps22hhTemperature_degC = lps22hhTemperature_degC;
-
 	/*
-	The ALTITUDE value calculated is actually "Pressure Altitude". This lacks correction for temperature (and humidity)
-	"pressure altitude" calculator located at: https://www.weather.gov/epz/wxcalc_pressurealtitude
-	"pressure altitude" formula is defined at: https://www.weather.gov/media/epz/wxcalc/pressureAltitude.pdf
-	 altitude in feet = 145366.45 * (1 - (hPa / 1013.25) ^ 0.190284) feet
-	 altitude in meters = 145366.45 * 0.3048 * (1 - (hPa / 1013.25) ^ 0.190284) meters
-	*/
-	// weather.com formula
-	//altitude = 44307.69396 * (1 - powf((atm / 1013.25), 0.190284));  // pressure altitude in meters
-	// Bosch's formula
+The ALTITUDE value calculated is actually "Pressure Altitude". This lacks correction for temperature (and humidity)
+"pressure altitude" calculator located at: https://www.weather.gov/epz/wxcalc_pressurealtitude
+"pressure altitude" formula is defined at: https://www.weather.gov/media/epz/wxcalc/pressureAltitude.pdf
+ altitude in feet = 145366.45 * (1 - (hPa / 1013.25) ^ 0.190284) feet
+ altitude in meters = 145366.45 * 0.3048 * (1 - (hPa / 1013.25) ^ 0.190284) meters
+*/
+// weather.com formula
+//altitude = 44307.69396 * (1 - powf((atm / 1013.25), 0.190284));  // pressure altitude in meters
+// Bosch's formula
 	altitude = 44330 * (1 - powf((pressure_hPa / 1013.25), 1 / 5.255));  // pressure altitude in meters
 
 	Log_Debug("ALSPT19: Ambient Light[Lux] : %.2f\r\n", light_sensor);
 
 	//// OLED
 	update_oled();
-
 #if (defined(IOT_CENTRAL_APPLICATION) || defined(IOT_HUB_APPLICATION))
 
-	// We've seen that the first read of the Accelerometer data is garbage.  If this is the first pass
-	// reading data, don't report it to Azure.  Since we're graphing data in Azure, this data point
-	// will skew the data.
-	if (!firstPass) {
+		// We've seen that the first read of the Accelerometer data is garbage.  If this is the first pass
+		// reading data, don't report it to Azure.  Since we're graphing data in Azure, this data point
+		// will skew the data.
+		if (!firstPass) {
 
-		// Allocate memory for a telemetry message to Azure
-		char *pjsonBuffer = (char *)malloc(JSON_BUFFER_SIZE);
-		if (pjsonBuffer == NULL) {
-			Log_Debug("ERROR: not enough memory to send telemetry");
+			// Allocate memory for a telemetry message to Azure
+			char *pjsonBuffer = (char *)malloc(JSON_BUFFER_SIZE);
+			if (pjsonBuffer == NULL) {
+				Log_Debug("ERROR: not enough memory to send telemetry");
+			}
+
+			snprintf(pjsonBuffer, JSON_BUFFER_SIZE, "{\"gX\":\"%.2lf\", \"gY\":\"%.2lf\", \"gZ\":\"%.2lf\", \"aX\": \"%.2f\", \"aY\": \"%.2f\", \"aZ\": \"%.2f\", \"pressure\": \"%.2f\", \"light_intensity\": \"%.2f\", \"altitude\": \"%.2f\", \"temp\": \"%.2f\",  \"rssi\": \"%d\"}",
+				angular_rate_dps[0], angular_rate_dps[1], angular_rate_dps[2], acceleration_mg[0], acceleration_mg[1], acceleration_mg[2], pressure_hPa, light_sensor, altitude, lsm6dsoTemperature_degC, network_data.rssi);
+
+			Log_Debug("\n[Info] Sending telemetry: %s\n", pjsonBuffer);
+			AzureIoT_SendMessage(pjsonBuffer);
+			free(pjsonBuffer);
+
 		}
-		
-		snprintf(pjsonBuffer, JSON_BUFFER_SIZE, "{\"gX\":\"%.2lf\", \"gY\":\"%.2lf\", \"gZ\":\"%.2lf\", \"aX\": \"%.2f\", \"aY\": \"%.2f\", \"aZ\": \"%.2f\", \"pressure\": \"%.2f\", \"light_intensity\": \"%.2f\", \"altitude\": \"%.2f\", \"temp\": \"%.2f\",  \"rssi\": \"%d\"}",
-			angular_rate_dps[0], angular_rate_dps[1], angular_rate_dps[2], acceleration_mg[0], acceleration_mg[1], acceleration_mg[2], pressure_hPa, light_sensor, altitude, lsm6dsoTemperature_degC, network_data.rssi);
 
-		Log_Debug("\n[Info] Sending telemetry: %s\n", pjsonBuffer);
-		AzureIoT_SendMessage(pjsonBuffer);
-		free(pjsonBuffer);
-
-}
-
-	firstPass = false;
+		firstPass = false;
 
 #endif 
 
@@ -267,7 +265,6 @@ int initI2c(void) {
 		Log_Debug("ERROR: I2CMaster_SetTimeout: errno=%d (%s)\n", errno, strerror(errno));
 		return -1;
 	}
-
 	// Start OLED
 	if (oled_init())
 	{
@@ -281,7 +278,6 @@ int initI2c(void) {
 	// Draw AVNET logo
 	//oled_draw_logo();
 	oled_i2c_bus_status(0);
-
 	// Start lsm6dso specific init
 
 	// Initialize lsm6dso mems driver interface
@@ -293,7 +289,6 @@ int initI2c(void) {
 	lsm6dso_device_id_get(&dev_ctx, &whoamI);
 	if (whoamI != LSM6DSO_ID) {
 		Log_Debug("LSM6DSO not found!\n");
-
 		// OLED update
 		lsm6dso_status = 1;
 		oled_i2c_bus_status(1);
@@ -334,12 +329,15 @@ int initI2c(void) {
 
 	// lps22hh specific init
 
+	// Default the flag to false.  If we fail to communicate with the LPS22HH device, this flag
+	// will cause application execution to skip over LPS22HH specific code.
+	lps22hhDetected = false;
+
 	// Initialize lps22hh mems driver interface
 	pressure_ctx.read_reg = lsm6dso_read_lps22hh_cx;
 	pressure_ctx.write_reg = lsm6dso_write_lps22hh_cx;
 	pressure_ctx.handle = &i2cFd;
 
-	bool lps22hhDetected = false;
 	int failCount = 10;
 
 	while (!lps22hhDetected) {
@@ -351,7 +349,7 @@ int initI2c(void) {
 		lps22hh_device_id_get(&pressure_ctx, &whoamI);
 		if (whoamI != LPS22HH_ID) {
 			Log_Debug("LPS22HH not found!\n");
-			
+
 			// OLED update
 			lps22hh_status = 1;
 			oled_i2c_bus_status(2);
@@ -384,8 +382,10 @@ int initI2c(void) {
 		}
 
 		if (failCount-- == 0) {
-			Log_Debug("Failed to read LSM22HH device ID, exiting\n");
-			return -1;
+			bool lps22hhDetected = false;
+			Log_Debug("Failed to read LPS22HH device ID, disabling all access to LPS22HH device!\n");
+			Log_Debug("Usually a power cycle will correct this issue\n");
+			break;
 		}
 	}
 
@@ -393,14 +393,19 @@ int initI2c(void) {
 	// is stationary.
 
 	uint8_t reg;
-
 	
 	Log_Debug("LSM6DSO: Calibrating angular rate . . .\n"); 
 	Log_Debug("LSM6DSO: Please make sure the device is stationary.\n");
 
 	do {
-		// Read the calibration values
-		lsm6dso_gy_flag_data_ready_get(&dev_ctx, &reg);
+
+		// Delay and read the device until we have data!
+		do {
+			// Read the calibration values
+			HAL_Delay(5000);
+			lsm6dso_gy_flag_data_ready_get(&dev_ctx, &reg);
+		} while (!reg);
+
 		if (reg)
 		{
 			// Read angular rate field data to use for calibration offsets
@@ -408,11 +413,17 @@ int initI2c(void) {
 			lsm6dso_angular_rate_raw_get(&dev_ctx, raw_angular_rate_calibration.u8bit);
 		}
 
-		// Read the angular data rate again and verify that after applying the calibration, we have 0 angular rate in all directions
+		// Delay and read the device until we have data!
+		do {
+			// Read the calibration values
+			HAL_Delay(5000);
+			lsm6dso_gy_flag_data_ready_get(&dev_ctx, &reg);
+		} while (!reg);
 
-		lsm6dso_gy_flag_data_ready_get(&dev_ctx, &reg);
+		// Read the angular data rate again and verify that after applying the calibration, we have 0 angular rate in all directions
 		if (reg)
 		{
+
 			// Read angular rate field data
 			memset(data_raw_angular_rate.u8bit, 0x00, 3 * sizeof(int16_t));
 			lsm6dso_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
@@ -421,13 +432,13 @@ int initI2c(void) {
 			angular_rate_dps[0] = lsm6dso_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[0] - raw_angular_rate_calibration.i16bit[0]);
 			angular_rate_dps[1] = lsm6dso_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[1] - raw_angular_rate_calibration.i16bit[1]);
 			angular_rate_dps[2] = lsm6dso_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[2] - raw_angular_rate_calibration.i16bit[2]);
+
 		}
 
-	// If the angular values after applying the offset are not zero, then do it again!
-	} while (angular_rate_dps[0] == angular_rate_dps[1] == angular_rate_dps[2] == 0.0);
+	// If the angular values after applying the offset are not all 0.0s, then do it again!
+	} while ((angular_rate_dps[0] != 0.0) || (angular_rate_dps[1] != 0.0) || (angular_rate_dps[2] != 0.0));
 
 	Log_Debug("LSM6DSO: Calibrating angular rate complete!\n");
-
 
 	// Init the epoll interface to periodically run the AccelTimerEventHandler routine where we read the sensors
 
@@ -435,11 +446,12 @@ int initI2c(void) {
 	struct timespec accelReadPeriod = { .tv_sec = ACCEL_READ_PERIOD_SECONDS,.tv_nsec = ACCEL_READ_PERIOD_NANO_SECONDS };
 	// event handler data structures. Only the event handler field needs to be populated.
 	static EventData accelEventData = { .eventHandler = &AccelTimerEventHandler };
+	accelTimerFd = -1;
 	accelTimerFd = CreateTimerFdAndAddToEpoll(epollFd, &accelReadPeriod, &accelEventData, EPOLLIN);
 	if (accelTimerFd < 0) {
 		return -1;
 	}
-
+	
 	return 0;
 }
 
@@ -619,69 +631,64 @@ static int32_t lsm6dso_write_lps22hh_cx(void* ctx, uint8_t reg, uint8_t* data,
 static int32_t lsm6dso_read_lps22hh_cx(void* ctx, uint8_t reg, uint8_t* data, uint16_t len)
 {
 	lsm6dso_sh_cfg_read_t sh_cfg_read;
-	axis3bit16_t data_raw_acceleration;
+	uint8_t buf_raw[6];
 	int32_t ret;
 	uint8_t drdy;
 	lsm6dso_status_master_t master_status;
 
 	/* Disable accelerometer. */
 	lsm6dso_xl_data_rate_set(&dev_ctx, LSM6DSO_XL_ODR_OFF);
-	
-	// For each byte we need to read from the lps22hh
-	for (int i = 0; i < len; i++) {
 
-		/* Configure Sensor Hub to read LPS22HH. */
-		sh_cfg_read.slv_add = (LPS22HH_I2C_ADD_L &0xFEU) >> 1; /* 7bit I2C address */
-		sh_cfg_read.slv_subadd = reg+i;
-		sh_cfg_read.slv_len = 1;
+	/* Configure Sensor Hub to read LPS22HH. */
+	sh_cfg_read.slv_add = (LPS22HH_I2C_ADD_L & 0xFEU) >> 1; /* 7bit I2C address */
+	sh_cfg_read.slv_subadd = reg;
+	sh_cfg_read.slv_len = (uint8_t)len;
 
-		// Call the command to read the data from the sensor hub.
-		// This data will be read from the device connected to the 
-		// sensor hub, and saved into a register for us to read.
-		ret = lsm6dso_sh_slv0_cfg_read(&dev_ctx, &sh_cfg_read);
-		lsm6dso_sh_slave_connected_set(&dev_ctx, LSM6DSO_SLV_0);
+	// Call the command to read the data from the sensor hub.
+	// This data will be read from the device connected to the 
+	// sensor hub, and saved into a register for us to read.
+	ret = lsm6dso_sh_slv0_cfg_read(&dev_ctx, &sh_cfg_read);
 
-		/* Enable I2C Master and I2C master. */
-		lsm6dso_sh_master_set(&dev_ctx, PROPERTY_ENABLE);
+	// Using slave 0 only
+	lsm6dso_sh_slave_connected_set(&dev_ctx, LSM6DSO_SLV_0);
 
-		/* Enable accelerometer to trigger Sensor Hub operation. */
-		lsm6dso_xl_data_rate_set(&dev_ctx, LSM6DSO_XL_ODR_104Hz);
+	/* Enable I2C Master */
+	lsm6dso_sh_master_set(&dev_ctx, PROPERTY_ENABLE);
 
-		/* Wait Sensor Hub operation flag set. */
-		lsm6dso_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-		do {
-			HAL_Delay(20);
-			lsm6dso_xl_flag_data_ready_get(&dev_ctx, &drdy);
-		} while (!drdy);
+	/* Enable accelerometer to trigger Sensor Hub operation. */
+	lsm6dso_xl_data_rate_set(&dev_ctx, LSM6DSO_XL_ODR_104Hz);
 
-		do {
-			HAL_Delay(20);
-			lsm6dso_sh_status_get(&dev_ctx, &master_status);
-		} while (!master_status.sens_hub_endop);
+	/* Wait Sensor Hub operation flag set. */
+	lsm6dso_acceleration_raw_get(&dev_ctx, buf_raw);
+	do {
+		HAL_Delay(20);
+		lsm6dso_xl_flag_data_ready_get(&dev_ctx, &drdy);
+	} while (!drdy);
 
-		/* Disable I2C master and XL(trigger). */
-		lsm6dso_sh_master_set(&dev_ctx, PROPERTY_DISABLE);
-		lsm6dso_xl_data_rate_set(&dev_ctx, LSM6DSO_XL_ODR_OFF);
+	do {
+		HAL_Delay(20);
+		lsm6dso_sh_status_get(&dev_ctx, &master_status);
+	} while (!master_status.sens_hub_endop);
 
-		// Read the data from the device.  The call below reads
-		// all 18 sensor hub data.  We just need the data from 
-		// sensor hub 1, so copy that into our data array.
-		uint8_t buffer[18];
-		lsm6dso_sh_read_data_raw_get(&dev_ctx, buffer);
-		data[i] = buffer[1];
+	/* Disable I2C master and XL(trigger). */
+	lsm6dso_sh_master_set(&dev_ctx, PROPERTY_DISABLE);
+	lsm6dso_xl_data_rate_set(&dev_ctx, LSM6DSO_XL_ODR_OFF);
+
+	// Read the data from the device
+	lsm6dso_sh_read_data_raw_get(&dev_ctx, data, (uint8_t)len);
 
 #ifdef ENABLE_READ_WRITE_DEBUG
-		Log_Debug("Read %d bytes: ", len);
-		for (int i = 0; i < len; i++) {
-			Log_Debug("[%0x] ", data[i]);
-		}
-		Log_Debug("\n", len);
-#endif 
+	Log_Debug("Read %d bytes: ", len);
+	for (int i = 0; i < len; i++) {
+		Log_Debug("[%0x] ", data[i]);
 	}
+	Log_Debug("\n", len);
+#endif 
 
 	/* Re-enable accelerometer */
 	lsm6dso_xl_data_rate_set(&dev_ctx, LSM6DSO_XL_ODR_104Hz);
 
 	return ret;
 }
+
 

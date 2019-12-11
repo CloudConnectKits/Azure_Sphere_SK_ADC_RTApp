@@ -2,7 +2,7 @@
 
 // If your application is going to connect to an IoT Central Application, then enable this define.  When
 // enabled Device Twin JSON updates will conform to what IoT Central expects to confirm Device Twin settings
-#define IOT_CENTRAL_APPLICATION
+//#define IOT_CENTRAL_APPLICATION
 
 // If your application is going to connect straight to a IoT Hub, then enable this define.
 //#define IOT_HUB_APPLICATION
