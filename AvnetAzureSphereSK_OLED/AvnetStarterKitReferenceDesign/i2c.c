@@ -196,6 +196,16 @@ void AccelTimerEventHandler(EventData *eventData)
 		Log_Debug("LPS22HH: Temperature  [degC]: Not read!\r\n");
 	}
 
+	sensor_data.acceleration_mg[0] = acceleration_mg[0];
+	sensor_data.acceleration_mg[1] = acceleration_mg[1];
+	sensor_data.acceleration_mg[2] = acceleration_mg[2];
+	sensor_data.angular_rate_dps[0] = angular_rate_dps[0];
+	sensor_data.angular_rate_dps[1] = angular_rate_dps[1];
+	sensor_data.angular_rate_dps[2] = angular_rate_dps[2];
+	sensor_data.lsm6dsoTemperature_degC = lsm6dsoTemperature_degC;
+	sensor_data.lps22hhpressure_hPa = pressure_hPa;
+	sensor_data.lps22hhTemperature_degC = lps22hhTemperature_degC;
+
 	/*
 The ALTITUDE value calculated is actually "Pressure Altitude". This lacks correction for temperature (and humidity)
 "pressure altitude" calculator located at: https://www.weather.gov/epz/wxcalc_pressurealtitude
@@ -284,6 +294,9 @@ int initI2c(void) {
 	dev_ctx.write_reg = platform_write;
 	dev_ctx.read_reg = platform_read;
 	dev_ctx.handle = &i2cFd;
+
+	// Check device ID
+	HAL_Delay(5000); //pf
 
 	// Check device ID
 	lsm6dso_device_id_get(&dev_ctx, &whoamI);

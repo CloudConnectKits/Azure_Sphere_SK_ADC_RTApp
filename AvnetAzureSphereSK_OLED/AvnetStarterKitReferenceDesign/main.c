@@ -465,7 +465,7 @@ int main(int argc, char *argv[])
 	memset(ssid, 0, 128);
 
 	Log_Debug("Version String: %s\n", argv[1]);
-	Log_Debug("Avnet Starter Kit Simple Reference Application starting.\n");
+	Log_Debug("Avnet Starter Kit Advanced Reference Application starting.\n");
 	
     if (InitPeripheralsAndHandlers() != 0) {
         terminationRequired = true;
@@ -485,7 +485,7 @@ int main(int argc, char *argv[])
 		// - a failure to setup the client is a fatal error.
 		if (!AzureIoT_SetupClient()) {
 			Log_Debug("ERROR: Failed to set up IoT Hub client\n");
-			break;
+			Log_Debug("ERROR: Verify network connection and Azure Resource configurations\n");
 		}
 #endif 
 
