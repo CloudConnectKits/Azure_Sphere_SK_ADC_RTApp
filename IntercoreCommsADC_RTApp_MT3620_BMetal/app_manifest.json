@@ -6,7 +6,7 @@
   "Capabilities": {
     //// A7 application connection
     "AllowedApplicationConnections": [ "685f13af-25a5-40b2-8dd8-8cbc253ecbd8" ],
-    "Adc": [ "ADC0" ]
+    "Adc": [ "ADC-CONTROLLER-0" ]
   },
   "ApplicationType": "RealTimeCapable"
 }

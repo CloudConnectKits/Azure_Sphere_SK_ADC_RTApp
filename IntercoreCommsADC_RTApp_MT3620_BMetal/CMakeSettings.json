@@ -2,9 +2,9 @@
   "environments": [
     {
       "environment": "AzureSphere",
-
-      "AzureSphereTargetApplicationRuntimeVersion": 2,
-      "AzureSphereTargetBetaApis": "Beta1905"
+      "AzureSphereTargetApiSet": "3+Beta1909",
+      "AzureSphereTargetApplicationRuntimeVersion": 3,
+      "AzureSphereTargetBetaApis": "Beta1909"
     }
   ],
   "configurations": [
